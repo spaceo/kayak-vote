@@ -1,0 +1,23 @@
+type Inquiry {
+    id: ID! @id
+    createdAt: DateTime! @createdAt
+    apartment: Apartment!
+    email: String! @unique
+}
+
+type Vote {
+    id: ID! @id
+    createdAt: DateTime! @createdAt
+    apartment: String! @unique
+    option: Option!
+}
+
+type Apartment {
+    id: ID! @id
+    handle: String!
+}
+
+type Option {
+    id: ID! @id
+    title: String!
+}
