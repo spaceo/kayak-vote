@@ -7,7 +7,7 @@ import App from './App.jsx';
 
 // Pass your prisma endpoint to uri
 const client = new ApolloClient({
-    uri: 'http://localhost:4466'
+    uri: process.env.REACT_APP_GRAPHQL_SERVER
 });
 
 ReactDOM.render(
