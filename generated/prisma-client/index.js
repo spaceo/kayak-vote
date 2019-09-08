@@ -19,6 +19,10 @@ var models = [
   {
     name: "Option",
     embedded: false
+  },
+  {
+    name: "VotingPage",
+    embedded: false
   }
 ];
 exports.Prisma = prisma_lib_1.makePrismaClientClass({

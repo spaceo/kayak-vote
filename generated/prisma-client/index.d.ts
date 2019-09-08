@@ -20,6 +20,7 @@ export interface Exists {
   inquiry: (where?: InquiryWhereInput) => Promise<boolean>;
   option: (where?: OptionWhereInput) => Promise<boolean>;
   vote: (where?: VoteWhereInput) => Promise<boolean>;
+  votingPage: (where?: VotingPageWhereInput) => Promise<boolean>;
 }
 
 export interface Node {}
@@ -117,6 +118,25 @@ export interface Prisma {
     first?: Int;
     last?: Int;
   }) => VoteConnectionPromise;
+  votingPage: (where: VotingPageWhereUniqueInput) => VotingPageNullablePromise;
+  votingPages: (args?: {
+    where?: VotingPageWhereInput;
+    orderBy?: VotingPageOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => FragmentableArray<VotingPage>;
+  votingPagesConnection: (args?: {
+    where?: VotingPageWhereInput;
+    orderBy?: VotingPageOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => VotingPageConnectionPromise;
   node: (args: { id: ID_Output }) => Node;
 
   /**
@@ -187,6 +207,22 @@ export interface Prisma {
   }) => VotePromise;
   deleteVote: (where: VoteWhereUniqueInput) => VotePromise;
   deleteManyVotes: (where?: VoteWhereInput) => BatchPayloadPromise;
+  createVotingPage: (data: VotingPageCreateInput) => VotingPagePromise;
+  updateVotingPage: (args: {
+    data: VotingPageUpdateInput;
+    where: VotingPageWhereUniqueInput;
+  }) => VotingPagePromise;
+  updateManyVotingPages: (args: {
+    data: VotingPageUpdateManyMutationInput;
+    where?: VotingPageWhereInput;
+  }) => BatchPayloadPromise;
+  upsertVotingPage: (args: {
+    where: VotingPageWhereUniqueInput;
+    create: VotingPageCreateInput;
+    update: VotingPageUpdateInput;
+  }) => VotingPagePromise;
+  deleteVotingPage: (where: VotingPageWhereUniqueInput) => VotingPagePromise;
+  deleteManyVotingPages: (where?: VotingPageWhereInput) => BatchPayloadPromise;
 
   /**
    * Subscriptions
@@ -208,6 +244,9 @@ export interface Subscription {
   vote: (
     where?: VoteSubscriptionWhereInput
   ) => VoteSubscriptionPayloadSubscription;
+  votingPage: (
+    where?: VotingPageSubscriptionWhereInput
+  ) => VotingPageSubscriptionPayloadSubscription;
 }
 
 export interface ClientConstructor<T> {
@@ -235,8 +274,10 @@ export type InquiryOrderByInput =
 export type OptionOrderByInput =
   | "id_ASC"
   | "id_DESC"
-  | "title_ASC"
-  | "title_DESC";
+  | "name_ASC"
+  | "name_DESC"
+  | "weight_ASC"
+  | "weight_DESC";
 
 export type VoteOrderByInput =
   | "id_ASC"
@@ -244,12 +285,23 @@ export type VoteOrderByInput =
   | "createdAt_ASC"
   | "createdAt_DESC"
   | "apartment_ASC"
-  | "apartment_DESC";
+  | "apartment_DESC"
+  | "remark_ASC"
+  | "remark_DESC";
+
+export type VotingPageOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
+  | "title_ASC"
+  | "title_DESC"
+  | "body_ASC"
+  | "body_DESC";
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
 export type ApartmentWhereUniqueInput = AtLeastOne<{
   id: Maybe<ID_Input>;
+  handle?: Maybe<String>;
 }>;
 
 export interface ApartmentWhereInput {
@@ -353,20 +405,28 @@ export interface OptionWhereInput {
   id_not_starts_with?: Maybe<ID_Input>;
   id_ends_with?: Maybe<ID_Input>;
   id_not_ends_with?: Maybe<ID_Input>;
-  title?: Maybe<String>;
-  title_not?: Maybe<String>;
-  title_in?: Maybe<String[] | String>;
-  title_not_in?: Maybe<String[] | String>;
-  title_lt?: Maybe<String>;
-  title_lte?: Maybe<String>;
-  title_gt?: Maybe<String>;
-  title_gte?: Maybe<String>;
-  title_contains?: Maybe<String>;
-  title_not_contains?: Maybe<String>;
-  title_starts_with?: Maybe<String>;
-  title_not_starts_with?: Maybe<String>;
-  title_ends_with?: Maybe<String>;
-  title_not_ends_with?: Maybe<String>;
+  name?: Maybe<String>;
+  name_not?: Maybe<String>;
+  name_in?: Maybe<String[] | String>;
+  name_not_in?: Maybe<String[] | String>;
+  name_lt?: Maybe<String>;
+  name_lte?: Maybe<String>;
+  name_gt?: Maybe<String>;
+  name_gte?: Maybe<String>;
+  name_contains?: Maybe<String>;
+  name_not_contains?: Maybe<String>;
+  name_starts_with?: Maybe<String>;
+  name_not_starts_with?: Maybe<String>;
+  name_ends_with?: Maybe<String>;
+  name_not_ends_with?: Maybe<String>;
+  weight?: Maybe<Int>;
+  weight_not?: Maybe<Int>;
+  weight_in?: Maybe<Int[] | Int>;
+  weight_not_in?: Maybe<Int[] | Int>;
+  weight_lt?: Maybe<Int>;
+  weight_lte?: Maybe<Int>;
+  weight_gt?: Maybe<Int>;
+  weight_gte?: Maybe<Int>;
   AND?: Maybe<OptionWhereInput[] | OptionWhereInput>;
   OR?: Maybe<OptionWhereInput[] | OptionWhereInput>;
   NOT?: Maybe<OptionWhereInput[] | OptionWhereInput>;
@@ -414,10 +474,76 @@ export interface VoteWhereInput {
   apartment_not_starts_with?: Maybe<String>;
   apartment_ends_with?: Maybe<String>;
   apartment_not_ends_with?: Maybe<String>;
-  option?: Maybe<OptionWhereInput>;
+  choice?: Maybe<OptionWhereInput>;
+  remark?: Maybe<String>;
+  remark_not?: Maybe<String>;
+  remark_in?: Maybe<String[] | String>;
+  remark_not_in?: Maybe<String[] | String>;
+  remark_lt?: Maybe<String>;
+  remark_lte?: Maybe<String>;
+  remark_gt?: Maybe<String>;
+  remark_gte?: Maybe<String>;
+  remark_contains?: Maybe<String>;
+  remark_not_contains?: Maybe<String>;
+  remark_starts_with?: Maybe<String>;
+  remark_not_starts_with?: Maybe<String>;
+  remark_ends_with?: Maybe<String>;
+  remark_not_ends_with?: Maybe<String>;
   AND?: Maybe<VoteWhereInput[] | VoteWhereInput>;
   OR?: Maybe<VoteWhereInput[] | VoteWhereInput>;
   NOT?: Maybe<VoteWhereInput[] | VoteWhereInput>;
+}
+
+export type VotingPageWhereUniqueInput = AtLeastOne<{
+  id: Maybe<ID_Input>;
+}>;
+
+export interface VotingPageWhereInput {
+  id?: Maybe<ID_Input>;
+  id_not?: Maybe<ID_Input>;
+  id_in?: Maybe<ID_Input[] | ID_Input>;
+  id_not_in?: Maybe<ID_Input[] | ID_Input>;
+  id_lt?: Maybe<ID_Input>;
+  id_lte?: Maybe<ID_Input>;
+  id_gt?: Maybe<ID_Input>;
+  id_gte?: Maybe<ID_Input>;
+  id_contains?: Maybe<ID_Input>;
+  id_not_contains?: Maybe<ID_Input>;
+  id_starts_with?: Maybe<ID_Input>;
+  id_not_starts_with?: Maybe<ID_Input>;
+  id_ends_with?: Maybe<ID_Input>;
+  id_not_ends_with?: Maybe<ID_Input>;
+  title?: Maybe<String>;
+  title_not?: Maybe<String>;
+  title_in?: Maybe<String[] | String>;
+  title_not_in?: Maybe<String[] | String>;
+  title_lt?: Maybe<String>;
+  title_lte?: Maybe<String>;
+  title_gt?: Maybe<String>;
+  title_gte?: Maybe<String>;
+  title_contains?: Maybe<String>;
+  title_not_contains?: Maybe<String>;
+  title_starts_with?: Maybe<String>;
+  title_not_starts_with?: Maybe<String>;
+  title_ends_with?: Maybe<String>;
+  title_not_ends_with?: Maybe<String>;
+  body?: Maybe<String>;
+  body_not?: Maybe<String>;
+  body_in?: Maybe<String[] | String>;
+  body_not_in?: Maybe<String[] | String>;
+  body_lt?: Maybe<String>;
+  body_lte?: Maybe<String>;
+  body_gt?: Maybe<String>;
+  body_gte?: Maybe<String>;
+  body_contains?: Maybe<String>;
+  body_not_contains?: Maybe<String>;
+  body_starts_with?: Maybe<String>;
+  body_not_starts_with?: Maybe<String>;
+  body_ends_with?: Maybe<String>;
+  body_not_ends_with?: Maybe<String>;
+  AND?: Maybe<VotingPageWhereInput[] | VotingPageWhereInput>;
+  OR?: Maybe<VotingPageWhereInput[] | VotingPageWhereInput>;
+  NOT?: Maybe<VotingPageWhereInput[] | VotingPageWhereInput>;
 }
 
 export interface ApartmentCreateInput {
@@ -471,21 +597,25 @@ export interface InquiryUpdateManyMutationInput {
 
 export interface OptionCreateInput {
   id?: Maybe<ID_Input>;
-  title: String;
+  name: String;
+  weight: Int;
 }
 
 export interface OptionUpdateInput {
-  title?: Maybe<String>;
+  name?: Maybe<String>;
+  weight?: Maybe<Int>;
 }
 
 export interface OptionUpdateManyMutationInput {
-  title?: Maybe<String>;
+  name?: Maybe<String>;
+  weight?: Maybe<Int>;
 }
 
 export interface VoteCreateInput {
   id?: Maybe<ID_Input>;
   apartment: String;
-  option: OptionCreateOneInput;
+  choice: OptionCreateOneInput;
+  remark?: Maybe<String>;
 }
 
 export interface OptionCreateOneInput {
@@ -495,7 +625,8 @@ export interface OptionCreateOneInput {
 
 export interface VoteUpdateInput {
   apartment?: Maybe<String>;
-  option?: Maybe<OptionUpdateOneRequiredInput>;
+  choice?: Maybe<OptionUpdateOneRequiredInput>;
+  remark?: Maybe<String>;
 }
 
 export interface OptionUpdateOneRequiredInput {
@@ -506,7 +637,8 @@ export interface OptionUpdateOneRequiredInput {
 }
 
 export interface OptionUpdateDataInput {
-  title?: Maybe<String>;
+  name?: Maybe<String>;
+  weight?: Maybe<Int>;
 }
 
 export interface OptionUpsertNestedInput {
@@ -516,6 +648,23 @@ export interface OptionUpsertNestedInput {
 
 export interface VoteUpdateManyMutationInput {
   apartment?: Maybe<String>;
+  remark?: Maybe<String>;
+}
+
+export interface VotingPageCreateInput {
+  id?: Maybe<ID_Input>;
+  title: String;
+  body: String;
+}
+
+export interface VotingPageUpdateInput {
+  title?: Maybe<String>;
+  body?: Maybe<String>;
+}
+
+export interface VotingPageUpdateManyMutationInput {
+  title?: Maybe<String>;
+  body?: Maybe<String>;
 }
 
 export interface ApartmentSubscriptionWhereInput {
@@ -566,6 +715,23 @@ export interface VoteSubscriptionWhereInput {
   AND?: Maybe<VoteSubscriptionWhereInput[] | VoteSubscriptionWhereInput>;
   OR?: Maybe<VoteSubscriptionWhereInput[] | VoteSubscriptionWhereInput>;
   NOT?: Maybe<VoteSubscriptionWhereInput[] | VoteSubscriptionWhereInput>;
+}
+
+export interface VotingPageSubscriptionWhereInput {
+  mutation_in?: Maybe<MutationType[] | MutationType>;
+  updatedFields_contains?: Maybe<String>;
+  updatedFields_contains_every?: Maybe<String[] | String>;
+  updatedFields_contains_some?: Maybe<String[] | String>;
+  node?: Maybe<VotingPageWhereInput>;
+  AND?: Maybe<
+    VotingPageSubscriptionWhereInput[] | VotingPageSubscriptionWhereInput
+  >;
+  OR?: Maybe<
+    VotingPageSubscriptionWhereInput[] | VotingPageSubscriptionWhereInput
+  >;
+  NOT?: Maybe<
+    VotingPageSubscriptionWhereInput[] | VotingPageSubscriptionWhereInput
+  >;
 }
 
 export interface NodeNode {
@@ -762,26 +928,30 @@ export interface AggregateInquirySubscription
 
 export interface Option {
   id: ID_Output;
-  title: String;
+  name: String;
+  weight: Int;
 }
 
 export interface OptionPromise extends Promise<Option>, Fragmentable {
   id: () => Promise<ID_Output>;
-  title: () => Promise<String>;
+  name: () => Promise<String>;
+  weight: () => Promise<Int>;
 }
 
 export interface OptionSubscription
   extends Promise<AsyncIterator<Option>>,
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
-  title: () => Promise<AsyncIterator<String>>;
+  name: () => Promise<AsyncIterator<String>>;
+  weight: () => Promise<AsyncIterator<Int>>;
 }
 
 export interface OptionNullablePromise
   extends Promise<Option | null>,
     Fragmentable {
   id: () => Promise<ID_Output>;
-  title: () => Promise<String>;
+  name: () => Promise<String>;
+  weight: () => Promise<Int>;
 }
 
 export interface OptionConnection {
@@ -842,13 +1012,15 @@ export interface Vote {
   id: ID_Output;
   createdAt: DateTimeOutput;
   apartment: String;
+  remark?: String;
 }
 
 export interface VotePromise extends Promise<Vote>, Fragmentable {
   id: () => Promise<ID_Output>;
   createdAt: () => Promise<DateTimeOutput>;
   apartment: () => Promise<String>;
-  option: <T = OptionPromise>() => T;
+  choice: <T = OptionPromise>() => T;
+  remark: () => Promise<String>;
 }
 
 export interface VoteSubscription
@@ -857,7 +1029,8 @@ export interface VoteSubscription
   id: () => Promise<AsyncIterator<ID_Output>>;
   createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
   apartment: () => Promise<AsyncIterator<String>>;
-  option: <T = OptionSubscription>() => T;
+  choice: <T = OptionSubscription>() => T;
+  remark: () => Promise<AsyncIterator<String>>;
 }
 
 export interface VoteNullablePromise
@@ -866,7 +1039,8 @@ export interface VoteNullablePromise
   id: () => Promise<ID_Output>;
   createdAt: () => Promise<DateTimeOutput>;
   apartment: () => Promise<String>;
-  option: <T = OptionPromise>() => T;
+  choice: <T = OptionPromise>() => T;
+  remark: () => Promise<String>;
 }
 
 export interface VoteConnection {
@@ -919,6 +1093,90 @@ export interface AggregateVotePromise
 
 export interface AggregateVoteSubscription
   extends Promise<AsyncIterator<AggregateVote>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface VotingPage {
+  id: ID_Output;
+  title: String;
+  body: String;
+}
+
+export interface VotingPagePromise extends Promise<VotingPage>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  title: () => Promise<String>;
+  body: () => Promise<String>;
+}
+
+export interface VotingPageSubscription
+  extends Promise<AsyncIterator<VotingPage>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  title: () => Promise<AsyncIterator<String>>;
+  body: () => Promise<AsyncIterator<String>>;
+}
+
+export interface VotingPageNullablePromise
+  extends Promise<VotingPage | null>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  title: () => Promise<String>;
+  body: () => Promise<String>;
+}
+
+export interface VotingPageConnection {
+  pageInfo: PageInfo;
+  edges: VotingPageEdge[];
+}
+
+export interface VotingPageConnectionPromise
+  extends Promise<VotingPageConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<VotingPageEdge>>() => T;
+  aggregate: <T = AggregateVotingPagePromise>() => T;
+}
+
+export interface VotingPageConnectionSubscription
+  extends Promise<AsyncIterator<VotingPageConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<VotingPageEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateVotingPageSubscription>() => T;
+}
+
+export interface VotingPageEdge {
+  node: VotingPage;
+  cursor: String;
+}
+
+export interface VotingPageEdgePromise
+  extends Promise<VotingPageEdge>,
+    Fragmentable {
+  node: <T = VotingPagePromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface VotingPageEdgeSubscription
+  extends Promise<AsyncIterator<VotingPageEdge>>,
+    Fragmentable {
+  node: <T = VotingPageSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface AggregateVotingPage {
+  count: Int;
+}
+
+export interface AggregateVotingPagePromise
+  extends Promise<AggregateVotingPage>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateVotingPageSubscription
+  extends Promise<AsyncIterator<AggregateVotingPage>>,
     Fragmentable {
   count: () => Promise<AsyncIterator<Int>>;
 }
@@ -1057,21 +1315,24 @@ export interface OptionSubscriptionPayloadSubscription
 
 export interface OptionPreviousValues {
   id: ID_Output;
-  title: String;
+  name: String;
+  weight: Int;
 }
 
 export interface OptionPreviousValuesPromise
   extends Promise<OptionPreviousValues>,
     Fragmentable {
   id: () => Promise<ID_Output>;
-  title: () => Promise<String>;
+  name: () => Promise<String>;
+  weight: () => Promise<Int>;
 }
 
 export interface OptionPreviousValuesSubscription
   extends Promise<AsyncIterator<OptionPreviousValues>>,
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
-  title: () => Promise<AsyncIterator<String>>;
+  name: () => Promise<AsyncIterator<String>>;
+  weight: () => Promise<AsyncIterator<Int>>;
 }
 
 export interface VoteSubscriptionPayload {
@@ -1103,6 +1364,7 @@ export interface VotePreviousValues {
   id: ID_Output;
   createdAt: DateTimeOutput;
   apartment: String;
+  remark?: String;
 }
 
 export interface VotePreviousValuesPromise
@@ -1111,6 +1373,7 @@ export interface VotePreviousValuesPromise
   id: () => Promise<ID_Output>;
   createdAt: () => Promise<DateTimeOutput>;
   apartment: () => Promise<String>;
+  remark: () => Promise<String>;
 }
 
 export interface VotePreviousValuesSubscription
@@ -1119,6 +1382,54 @@ export interface VotePreviousValuesSubscription
   id: () => Promise<AsyncIterator<ID_Output>>;
   createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
   apartment: () => Promise<AsyncIterator<String>>;
+  remark: () => Promise<AsyncIterator<String>>;
+}
+
+export interface VotingPageSubscriptionPayload {
+  mutation: MutationType;
+  node: VotingPage;
+  updatedFields: String[];
+  previousValues: VotingPagePreviousValues;
+}
+
+export interface VotingPageSubscriptionPayloadPromise
+  extends Promise<VotingPageSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = VotingPagePromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = VotingPagePreviousValuesPromise>() => T;
+}
+
+export interface VotingPageSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<VotingPageSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = VotingPageSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = VotingPagePreviousValuesSubscription>() => T;
+}
+
+export interface VotingPagePreviousValues {
+  id: ID_Output;
+  title: String;
+  body: String;
+}
+
+export interface VotingPagePreviousValuesPromise
+  extends Promise<VotingPagePreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  title: () => Promise<String>;
+  body: () => Promise<String>;
+}
+
+export interface VotingPagePreviousValuesSubscription
+  extends Promise<AsyncIterator<VotingPagePreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  title: () => Promise<AsyncIterator<String>>;
+  body: () => Promise<AsyncIterator<String>>;
 }
 
 /*
@@ -1173,6 +1484,10 @@ export const models: Model[] = [
   },
   {
     name: "Option",
+    embedded: false
+  },
+  {
+    name: "VotingPage",
     embedded: false
   }
 ];

@@ -9,15 +9,23 @@ type Vote {
     id: ID! @id
     createdAt: DateTime! @createdAt
     apartment: String! @unique
-    option: Option!
+    choice: Option!
+    remark: String
 }
 
 type Apartment {
     id: ID! @id
-    handle: String!
+    handle: String! @unique
 }
 
 type Option {
     id: ID! @id
+    name: String!
+    weight: Int!
+}
+
+type VotingPage {
+    id: ID! @id
     title: String!
+    body: String!
 }

@@ -19,6 +19,10 @@ type AggregateVote {
   count: Int!
 }
 
+type AggregateVotingPage {
+  count: Int!
+}
+
 type Apartment {
   id: ID!
   handle: String!
@@ -135,6 +139,7 @@ input ApartmentWhereInput {
 
 input ApartmentWhereUniqueInput {
   id: ID
+  handle: String
 }
 
 type BatchPayload {
@@ -284,6 +289,12 @@ type Mutation {
   upsertVote(where: VoteWhereUniqueInput!, create: VoteCreateInput!, update: VoteUpdateInput!): Vote!
   deleteVote(where: VoteWhereUniqueInput!): Vote
   deleteManyVotes(where: VoteWhereInput): BatchPayload!
+  createVotingPage(data: VotingPageCreateInput!): VotingPage!
+  updateVotingPage(data: VotingPageUpdateInput!, where: VotingPageWhereUniqueInput!): VotingPage
+  updateManyVotingPages(data: VotingPageUpdateManyMutationInput!, where: VotingPageWhereInput): BatchPayload!
+  upsertVotingPage(where: VotingPageWhereUniqueInput!, create: VotingPageCreateInput!, update: VotingPageUpdateInput!): VotingPage!
+  deleteVotingPage(where: VotingPageWhereUniqueInput!): VotingPage
+  deleteManyVotingPages(where: VotingPageWhereInput): BatchPayload!
 }
 
 enum MutationType {
@@ -298,7 +309,8 @@ interface Node {
 
 type Option {
   id: ID!
-  title: String!
+  name: String!
+  weight: Int!
 }
 
 type OptionConnection {
@@ -309,7 +321,8 @@ type OptionConnection {
 
 input OptionCreateInput {
   id: ID
-  title: String!
+  name: String!
+  weight: Int!
 }
 
 input OptionCreateOneInput {
@@ -325,13 +338,16 @@ type OptionEdge {
 enum OptionOrderByInput {
   id_ASC
   id_DESC
-  title_ASC
-  title_DESC
+  name_ASC
+  name_DESC
+  weight_ASC
+  weight_DESC
 }
 
 type OptionPreviousValues {
   id: ID!
-  title: String!
+  name: String!
+  weight: Int!
 }
 
 type OptionSubscriptionPayload {
@@ -353,15 +369,18 @@ input OptionSubscriptionWhereInput {
 }
 
 input OptionUpdateDataInput {
-  title: String
+  name: String
+  weight: Int
 }
 
 input OptionUpdateInput {
-  title: String
+  name: String
+  weight: Int
 }
 
 input OptionUpdateManyMutationInput {
-  title: String
+  name: String
+  weight: Int
 }
 
 input OptionUpdateOneRequiredInput {
@@ -391,20 +410,28 @@ input OptionWhereInput {
   id_not_starts_with: ID
   id_ends_with: ID
   id_not_ends_with: ID
-  title: String
-  title_not: String
-  title_in: [String!]
-  title_not_in: [String!]
-  title_lt: String
-  title_lte: String
-  title_gt: String
-  title_gte: String
-  title_contains: String
-  title_not_contains: String
-  title_starts_with: String
-  title_not_starts_with: String
-  title_ends_with: String
-  title_not_ends_with: String
+  name: String
+  name_not: String
+  name_in: [String!]
+  name_not_in: [String!]
+  name_lt: String
+  name_lte: String
+  name_gt: String
+  name_gte: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  weight: Int
+  weight_not: Int
+  weight_in: [Int!]
+  weight_not_in: [Int!]
+  weight_lt: Int
+  weight_lte: Int
+  weight_gt: Int
+  weight_gte: Int
   AND: [OptionWhereInput!]
   OR: [OptionWhereInput!]
   NOT: [OptionWhereInput!]
@@ -434,6 +461,9 @@ type Query {
   vote(where: VoteWhereUniqueInput!): Vote
   votes(where: VoteWhereInput, orderBy: VoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Vote]!
   votesConnection(where: VoteWhereInput, orderBy: VoteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): VoteConnection!
+  votingPage(where: VotingPageWhereUniqueInput!): VotingPage
+  votingPages(where: VotingPageWhereInput, orderBy: VotingPageOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [VotingPage]!
+  votingPagesConnection(where: VotingPageWhereInput, orderBy: VotingPageOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): VotingPageConnection!
   node(id: ID!): Node
 }
 
@@ -442,13 +472,15 @@ type Subscription {
   inquiry(where: InquirySubscriptionWhereInput): InquirySubscriptionPayload
   option(where: OptionSubscriptionWhereInput): OptionSubscriptionPayload
   vote(where: VoteSubscriptionWhereInput): VoteSubscriptionPayload
+  votingPage(where: VotingPageSubscriptionWhereInput): VotingPageSubscriptionPayload
 }
 
 type Vote {
   id: ID!
   createdAt: DateTime!
   apartment: String!
-  option: Option!
+  choice: Option!
+  remark: String
 }
 
 type VoteConnection {
@@ -460,7 +492,8 @@ type VoteConnection {
 input VoteCreateInput {
   id: ID
   apartment: String!
-  option: OptionCreateOneInput!
+  choice: OptionCreateOneInput!
+  remark: String
 }
 
 type VoteEdge {
@@ -475,12 +508,15 @@ enum VoteOrderByInput {
   createdAt_DESC
   apartment_ASC
   apartment_DESC
+  remark_ASC
+  remark_DESC
 }
 
 type VotePreviousValues {
   id: ID!
   createdAt: DateTime!
   apartment: String!
+  remark: String
 }
 
 type VoteSubscriptionPayload {
@@ -503,11 +539,13 @@ input VoteSubscriptionWhereInput {
 
 input VoteUpdateInput {
   apartment: String
-  option: OptionUpdateOneRequiredInput
+  choice: OptionUpdateOneRequiredInput
+  remark: String
 }
 
 input VoteUpdateManyMutationInput {
   apartment: String
+  remark: String
 }
 
 input VoteWhereInput {
@@ -547,7 +585,21 @@ input VoteWhereInput {
   apartment_not_starts_with: String
   apartment_ends_with: String
   apartment_not_ends_with: String
-  option: OptionWhereInput
+  choice: OptionWhereInput
+  remark: String
+  remark_not: String
+  remark_in: [String!]
+  remark_not_in: [String!]
+  remark_lt: String
+  remark_lte: String
+  remark_gt: String
+  remark_gte: String
+  remark_contains: String
+  remark_not_contains: String
+  remark_starts_with: String
+  remark_not_starts_with: String
+  remark_ends_with: String
+  remark_not_ends_with: String
   AND: [VoteWhereInput!]
   OR: [VoteWhereInput!]
   NOT: [VoteWhereInput!]
@@ -556,6 +608,124 @@ input VoteWhereInput {
 input VoteWhereUniqueInput {
   id: ID
   apartment: String
+}
+
+type VotingPage {
+  id: ID!
+  title: String!
+  body: String!
+}
+
+type VotingPageConnection {
+  pageInfo: PageInfo!
+  edges: [VotingPageEdge]!
+  aggregate: AggregateVotingPage!
+}
+
+input VotingPageCreateInput {
+  id: ID
+  title: String!
+  body: String!
+}
+
+type VotingPageEdge {
+  node: VotingPage!
+  cursor: String!
+}
+
+enum VotingPageOrderByInput {
+  id_ASC
+  id_DESC
+  title_ASC
+  title_DESC
+  body_ASC
+  body_DESC
+}
+
+type VotingPagePreviousValues {
+  id: ID!
+  title: String!
+  body: String!
+}
+
+type VotingPageSubscriptionPayload {
+  mutation: MutationType!
+  node: VotingPage
+  updatedFields: [String!]
+  previousValues: VotingPagePreviousValues
+}
+
+input VotingPageSubscriptionWhereInput {
+  mutation_in: [MutationType!]
+  updatedFields_contains: String
+  updatedFields_contains_every: [String!]
+  updatedFields_contains_some: [String!]
+  node: VotingPageWhereInput
+  AND: [VotingPageSubscriptionWhereInput!]
+  OR: [VotingPageSubscriptionWhereInput!]
+  NOT: [VotingPageSubscriptionWhereInput!]
+}
+
+input VotingPageUpdateInput {
+  title: String
+  body: String
+}
+
+input VotingPageUpdateManyMutationInput {
+  title: String
+  body: String
+}
+
+input VotingPageWhereInput {
+  id: ID
+  id_not: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  id_lt: ID
+  id_lte: ID
+  id_gt: ID
+  id_gte: ID
+  id_contains: ID
+  id_not_contains: ID
+  id_starts_with: ID
+  id_not_starts_with: ID
+  id_ends_with: ID
+  id_not_ends_with: ID
+  title: String
+  title_not: String
+  title_in: [String!]
+  title_not_in: [String!]
+  title_lt: String
+  title_lte: String
+  title_gt: String
+  title_gte: String
+  title_contains: String
+  title_not_contains: String
+  title_starts_with: String
+  title_not_starts_with: String
+  title_ends_with: String
+  title_not_ends_with: String
+  body: String
+  body_not: String
+  body_in: [String!]
+  body_not_in: [String!]
+  body_lt: String
+  body_lte: String
+  body_gt: String
+  body_gte: String
+  body_contains: String
+  body_not_contains: String
+  body_starts_with: String
+  body_not_starts_with: String
+  body_ends_with: String
+  body_not_ends_with: String
+  AND: [VotingPageWhereInput!]
+  OR: [VotingPageWhereInput!]
+  NOT: [VotingPageWhereInput!]
+}
+
+input VotingPageWhereUniqueInput {
+  id: ID
 }
 `
       }
